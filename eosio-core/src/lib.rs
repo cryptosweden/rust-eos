@@ -1,5 +1,6 @@
 //! TODO docs
 #![recursion_limit="128"]
+#![feature(type_alias_enum_variants)]
 #![deny(
     clippy::correctness,
     clippy::indexing_slicing,
