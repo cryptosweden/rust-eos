@@ -24,6 +24,7 @@
 //! ```
 //!
 //! [`eosio_core`]: https://crates.io/crates/eosio_core
+#![recursion_limit="128"]
 #![allow(clippy::unimplemented)]
 extern crate proc_macro;
 

@@ -1,4 +1,5 @@
 //! TODO docs
+#![recursion_limit="128"]
 #![deny(
     clippy::correctness,
     clippy::indexing_slicing,
