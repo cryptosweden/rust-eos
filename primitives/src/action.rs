@@ -1,7 +1,96 @@
 //! <https://github.com/EOSIO/eosio.cdt/blob/4985359a30da1f883418b7133593f835927b8046/libraries/eosiolib/contracts/eosio/action.hpp#L249-L274>
-use crate::{AccountName, ActionName, NumBytes, PermissionLevel, Read, Write, Asset, SerializeData};
+use crate::{AccountName, Checksum256, ActionName, NumBytes, PermissionLevel, Read, Write, Asset, SerializeData};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use bitcoin_hashes::{
+    Hash,
+    sha256,
+};
+
+impl SerializeData for Action {}
+impl SerializeData for  ActionReceipt {}
+
+pub type ActionReceipts = Vec<ActionReceipt>;
+pub type PermissionLevels = Vec<PermissionLevel>;
+
+#[derive(Read, Write, NumBytes, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Hash, Default)]
+#[eosio_core_root_path = "crate"]
+pub struct ActionReceipt {
+    pub receiver: AccountName,
+    pub act_digest: Checksum256,
+    pub global_sequence: u64,
+    pub recv_sequence: u64,
+    pub auth_sequence: AuthSequences,
+    pub code_sequence: usize,
+    pub abi_sequence: usize,
+}
+
+#[derive(Read, Write, NumBytes, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Hash, Default)]
+#[eosio_core_root_path = "crate"]
+pub struct AuthSequence(AccountName, u64);
+pub type AuthSequences = Vec<AuthSequence>;
+
+impl AuthSequence {
+    pub fn new(
+        name: &str,
+        number: u64
+    ) -> Result<AuthSequence, crate::Error> {
+        Ok(
+            AuthSequence(
+                AccountName::from_str(name)
+                    .map_err(|err| crate::Error::from(err) )?,
+                number,
+            )
+        )
+    }
+}
+
+impl ActionReceipt {
+
+    fn convert_hex_to_checksum256(
+        digest_hex: &str
+    ) -> Result<Checksum256, crate::Error> {
+        let bytes = hex::decode(digest_hex)
+            //.map_err(|err| crate::Error::from(err))?;
+            .expect("Invalid hex error!"); // TODO: Handle better!
+        Self::convert_bytes_to_checksum256(bytes)
+    }
+
+    fn convert_bytes_to_checksum256(
+        digest_vec: Vec<u8>,
+    ) -> Result<Checksum256, crate::Error> {
+        let mut digest_arr = [0; 32];
+        digest_arr.copy_from_slice(&digest_vec);
+        Ok(Checksum256::from(digest_arr))
+    }
+
+    pub fn new(
+        receiver: &str,
+        digest_hex: &str,
+        recv_sequence: u64,
+        abi_sequence: usize,
+        global_sequence: u64,
+        code_sequence: usize,
+        auth_sequence: AuthSequences,
+    ) -> Result<ActionReceipt, crate::Error> {
+        Ok(
+            ActionReceipt {
+                abi_sequence,
+                recv_sequence,
+                code_sequence,
+                auth_sequence,
+                global_sequence,
+                receiver: AccountName::from_str(receiver)
+                    .map_err(|err| crate::Error::from(err))?,
+                act_digest: Self::convert_hex_to_checksum256(digest_hex)?,
+            }
+        )
+    }
+
+    pub fn to_digest(&self) -> Vec<u8> {
+        sha256::Hash::hash(&self.to_serialize_data()).to_vec()
+    }
+}
 
 /// This is the packed representation of an action along with meta-data about
 /// the authorization levels.
@@ -36,8 +125,6 @@ impl Action {
         Ok(Action { account, name, authorization, data })
     }
 }
-
-impl SerializeData for Action {}
 
 #[derive(Clone, Debug, Serialize, Deserialize, Read, Write, NumBytes, Default)]
 #[eosio_core_root_path = "crate"]
