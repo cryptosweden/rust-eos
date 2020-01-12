@@ -21,7 +21,7 @@ use std::time::{SystemTime, UNIX_EPOCH, Duration};
     Serialize,
 )]
 #[eosio_core_root_path = "crate"]
-pub struct TimePointSec(u32);
+pub struct TimePointSec(pub u32);
 
 impl TimePointSec {
     /// Gets the nanoseconds
@@ -36,6 +36,16 @@ impl TimePointSec {
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards");
 
+        TimePointSec(since_the_epoch.as_secs() as u32)
+    }
+
+    pub fn seconds_from_now(seconds: u64) -> Self {
+        let start = SystemTime::now()
+            .checked_add(Duration::from_secs(seconds))
+            .unwrap();
+        let since_the_epoch = start
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards");
         TimePointSec(since_the_epoch.as_secs() as u32)
     }
 }
