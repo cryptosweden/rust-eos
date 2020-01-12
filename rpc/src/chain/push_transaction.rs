@@ -99,6 +99,7 @@ mod tests {
     use crate::{HyperClient, GetInfo, GetBlock};
     use crate::{get_info, get_block};
 
+    /*
     #[test]
     fn push_transaction_should_work() {
         // import private key
@@ -151,4 +152,5 @@ mod tests {
         let res: PushTransaction = response.unwrap();
         dbg!(res);
     }
+    */
 }
