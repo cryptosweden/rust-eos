@@ -1,5 +1,5 @@
 use crate::{Action, NumBytes, Read, TimePointSec, UnsignedInt, Write, SerializeData};
-use keys::secret::SecretKey;
+//use keys::secret::SecretKey;
 use hex;
 
 #[derive(Read, Write, NumBytes, PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Hash, Default)]
@@ -52,6 +52,21 @@ impl Transaction {
         }
     }
 
+    pub fn get_signing_data(
+        &self,
+        chain_id: String
+    ) -> Result<Vec<u8>, crate::error::Error> {
+        let mut sign_data: Vec<u8>  = Vec::new();
+        let mut chain_id_hex = hex::decode(chain_id)
+            .map_err(|err| crate::error::Error::FromHexError(err))?;
+        sign_data.append(&mut chain_id_hex);
+        sign_data.append(&mut self.to_serialize_data());
+        sign_data.append(&mut vec![0u8; 32]);
+
+        Ok(sign_data)
+    }
+
+    /*
     pub fn sign(&self, sk: SecretKey, chain_id: String) -> Result<SignedTransaction, crate::error::Error> {
         let mut sign_data: Vec<u8>  = Vec::new();
         let mut chain_id_hex = hex::decode(chain_id)
@@ -69,6 +84,7 @@ impl Transaction {
             trx: self.clone(),
         })
     }
+    */
 }
 
 impl SerializeData for Transaction {}
@@ -99,8 +115,9 @@ impl From<u128> for DeferredTransactionId {
 mod test {
     use super::*;
     use crate::{ActionTransfer, PermissionLevel};
-    use keys::secret::SecretKey;
+    //use keys::secret::SecretKey;
 
+    /*
     #[test]
     fn sign_tx_should_work() {
         let sk = SecretKey::from_wif("5KUEhweMaSD2szyjU9EKjAyY642ZdVL2qzHW72dQcNRzUMWx9EL").unwrap();
@@ -137,4 +154,5 @@ mod test {
         );
         dbg!(signed_trx.ok().unwrap());
     }
+    */
 }
