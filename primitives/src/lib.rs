@@ -1,9 +1,12 @@
+#![feature(type_alias_enum_variants)]
+
 pub mod action;
 pub mod asset;
 pub mod bytes;
 pub mod error;
 pub mod names;
 pub mod ops;
+pub mod checksum256;
 pub mod permission_level;
 pub mod symbol;
 pub mod symbol_code;
@@ -17,7 +20,7 @@ pub use eosio_core_derive::*;
 pub use self::{
     action::*, asset::*, bytes::*, error::*, names::*, ops::*, permission_level::*,
     symbol::*, symbol_code::*, time_point::*, time_point_sec::*, transaction::*,
-    unsigned_int::*,
+    unsigned_int::*, checksum256::*,
 };
 
 pub trait SerializeData: Write + NumBytes {
