@@ -36,7 +36,7 @@ impl PublicKey {
         public_key[..PUBLIC_KEY_SIZE].copy_from_slice(self.to_bytes().as_ref());
         public_key[PUBLIC_KEY_SIZE..].copy_from_slice(&h160.take()[..PUBLIC_KEY_CHECKSUM_SIZE]);
 
-        format!("EOS{}", base58::encode_slice(&public_key))
+        format!("FIO{}", base58::encode_slice(&public_key))
     }
 
     /// Verify a signature on a message with public key.
@@ -86,7 +86,7 @@ impl fmt::Display for PublicKey {
 impl FromStr for PublicKey {
     type Err = error::Error;
     fn from_str(s: &str) -> crate::Result<PublicKey> {
-        if !s.starts_with("EOS") {
+        if !s.starts_with("FIO") {
             return Err(secp256k1::Error::InvalidPublicKey.into());
         }
 
