@@ -139,12 +139,9 @@ impl serde::ser::Serialize for Action {
         state.serialize_field("name", &self.name)?;
         state.serialize_field("authorization", &self.authorization)?;
         state.serialize_field("hex_data", &hex::encode(&self.data))?;
-        match (self.account.to_string().as_str(), self.name.to_string().as_str()) {
-            ("eosio.token", "transfer") => {
-                let data = ActionTransfer::read(&self.data, &mut 0).map_err(|_| S::Error::custom("Action read from data failed."))?;
-                state.serialize_field("data", &data)?;
-            },
-            _ => {}
+        if let ("eosio.token", "transfer") = (self.account.to_string().as_str(), self.name.to_string().as_str()) {
+            let data = ActionTransfer::read(&self.data, &mut 0).map_err(|_| S::Error::custom("Action read from data failed."))?;
+            state.serialize_field("data", &data)?;
         }
         state.end()
     }
